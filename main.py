@@ -1,6 +1,8 @@
 import pygame
 import colors
 import functions
+
+pygame.mixer.init()
 SCREEN_WIDTH = 650
 SCREEN_HEIGHT = 450
 Gamewindow = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
@@ -18,8 +20,8 @@ def gameLoop():
     # Game variables 
     exitGame = False
     gameOver = False
-    snakeX = 450
-    snakeY = 300
+    snakeX = SCREEN_WIDTH/2
+    snakeY = SCREEN_HEIGHT/2
     snakeSize = 20
     velocityX = 0
     velocityY = 0
@@ -29,11 +31,16 @@ def gameLoop():
     foodSize = 10
     score = 0
     snakeLength = 0
+    with open("highScore.txt","r") as f:
+        highScore = f.read()
 
     clock = pygame.time.Clock()
 
     snakeSegments = [(snakeX,snakeY)]
     head = []
+
+
+
     while not exitGame:
         pygame.display.update()
         for event in pygame.event.get():
@@ -72,6 +79,8 @@ def gameLoop():
             foodX = functions.getRandX(SCREEN_WIDTH)
             foodY = functions.getRandX(SCREEN_HEIGHT)
             snakeLength += 5
+            if score > int(highScore):
+                highScore = score
 
         head = (snakeX,snakeY)
         
@@ -86,9 +95,8 @@ def gameLoop():
         Gamewindow.fill(colors.white)
 
         pygame.draw.circle(Gamewindow,colors.brown,[foodX,foodY],foodSize)
-        # pygame.draw.rect(Gamewindow,colors.green,[snakeX,snakeY,snakeSize,snakeSize])
         drawSnake(Gamewindow,colors.green,snakeSegments,snakeSize)
-        text = functions.renderText("Score : " + str(score), colors.red,None)
+        text = functions.renderText("Score : " + str(score) + ", HighScore : " + str(highScore), colors.red,None)
         Gamewindow.blit(text,[15,15])
         pygame.display.update()
 
@@ -97,6 +105,8 @@ def gameLoop():
         if gameOver:
             # Display game over text and wait for Enter key
             Gamewindow.fill(colors.white)
+            with open("highScore.txt","w") as f:
+                f.write(str(highScore))
             text = functions.renderText("Game Over! Press Enter to start over", colors.red,None)
             Gamewindow.blit(text, [SCREEN_WIDTH/2 -300, SCREEN_HEIGHT/2])
             pygame.display.update()
